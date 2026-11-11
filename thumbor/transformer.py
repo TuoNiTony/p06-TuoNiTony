@@ -284,17 +284,23 @@ class Transformer:
             > self.target_height / source_height
         ):
             crop_width = source_width
-            crop_height = int(
-                round(source_width * self.target_height / target_width, 0)
+            crop_height = max(
+                1,
+                int(
+                    round(source_width * self.target_height / target_width, 0)
+                ),
             )
         else:
-            crop_width = int(
-                round(
-                    math.ceil(
-                        self.target_width * source_height / target_height
-                    ),
-                    0,
-                )
+            crop_width = max(
+                1,
+                int(
+                    round(
+                        math.ceil(
+                            self.target_width * source_height / target_height
+                        ),
+                        0,
+                    )
+                ),
             )
             crop_height = source_height
 
@@ -386,19 +392,28 @@ class Transformer:
         ):
             return
 
+        target_width = max(1, self.target_width)
+        target_height = max(1, self.target_height)
+
         # add 1e-5 to get .5 rounding up in Python3 as it was in Python2
         if (
-            source_width / self.target_width * sign
-            >= source_height / self.target_height * sign
+            source_width / target_width * sign
+            >= source_height / target_height * sign
         ):
-            resize_height = round(
-                source_height * self.target_width / source_width + 1e-5
+            resize_height = max(
+                1,
+                round(
+                    source_height * target_width / source_width + 1e-5
+                ),
             )
-            resize_width = self.target_width
+            resize_width = target_width
         else:
-            resize_height = self.target_height
-            resize_width = round(
-                source_width * self.target_height / source_height + 1e-5
+            resize_height = target_height
+            resize_width = max(
+                1,
+                round(
+                    source_width * target_height / source_height + 1e-5
+                ),
             )
 
         # ensure that filter should work on the real image size
