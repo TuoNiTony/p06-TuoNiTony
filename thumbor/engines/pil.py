@@ -278,6 +278,15 @@ class Engine(BaseEngine):
                 )
                 self.image = self.image.quantize(method=quantize_method)
 
+                # quantize() keeps alpha in the palette but does not set
+                # info["transparency"], so the GIF writer would drop it.
+                # Mark the first fully transparent palette entry instead.
+                palette = self.image.getpalette("RGBA") or []
+                for index in range(len(palette) // 4):
+                    if palette[index * 4 + 3] == 0:
+                        self.image.info["transparency"] = index
+                        break
+
         ext = requested_extension or self.get_default_extension()
 
         if ext in (".heic", ".heif") and not HAVE_HEIF:
